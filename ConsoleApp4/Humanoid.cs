@@ -24,6 +24,8 @@ namespace ConsoleApp4
         public int Age { get; set; }
         public int AvailablePowerPoints { get; set; } = 0;
         public Level CombatLevel { get; set; }
+        public ToolItem Belt { get; set; }
+
 
         public Level Smithing { get; set; } = new Level();
         public Level Barter { get; set; } = new Level();
@@ -184,7 +186,7 @@ namespace ConsoleApp4
             if (damage < 0)
                 damage = 0;
 
-            damage = CompressDamage(damage);
+            damage = other.CompressDamage(damage);
 
             var xp = damage * 4;
             CombatLevel.AddXP(xp);
@@ -257,12 +259,12 @@ namespace ConsoleApp4
 
         public int GetAttackDamage()
         {
-            return GetWearablePower().Strength + 1;
+            return GetWearablePower().Strength;
         }
 
         public int GetMagicDamage()
         {
-            return GetWearablePower().Inteligence + 1;
+            return GetWearablePower().Inteligence;
         }
 
         public Bag Inventory { get; set; } = new Bag();

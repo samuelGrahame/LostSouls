@@ -20,7 +20,7 @@ namespace ConsoleApp4
 
         [STAThread]
         static void Main(string[] args)
-        {            
+        {           
             Application.EnableVisualStyles();
             
             stats = new frmStats();
@@ -211,8 +211,7 @@ namespace ConsoleApp4
         }
 
         private static bool _isReading;
-        private static string _currentPrefix;
-
+        
         static void ClearConsole()
         {
             var length = Console.CursorLeft;

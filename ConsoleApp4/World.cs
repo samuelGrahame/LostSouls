@@ -58,7 +58,7 @@ namespace ConsoleApp4
 			Humanoids.Remove(humanoid);
 		}
 
-        public void ProcessMakeWearableInSmith(IList Items, string Caption)
+        public void ProcessBuyOrMakeItem(IList Items, string Caption)
         {
             bool inList = true;
             
@@ -77,7 +77,9 @@ namespace ConsoleApp4
                     }
                     if(wearableItem != null)
                     {
-                        var price = (wearableItem.Power.Strength + 1) * (wearableItem.Power.Inteligence + 1) * (wearableItem.Power.Defence + 1);
+                        var price = item is ToolItem ? (item as ToolItem).Price : (wearableItem.Power.Strength + 1) * (wearableItem.Power.Inteligence + 1) * (wearableItem.Power.Defence + 1) *
+                            (ActiveBuilding.Type == BuildingType.Blacksmith ? ActiveBuilding.Owner.Smithing.Value : 1);                            
+                        
                         Commands1.Add(new Tuple<string, string, Action>($"{Commands1.Count}: {wearableItem.Name}, price: { GetOrenLabel(price) }", $"{wearableItem.Name},{Commands1.Count}", () =>
                         {
                             if (Question($"{ActiveBuilding.Owner.Name}: Are you sure you would like to buy a {wearableItem.Name} for { GetOrenLabel(price) }?", "yes", "no") == "yes")
@@ -85,8 +87,24 @@ namespace ConsoleApp4
                                 if (MainCharacter.Orens >= price)
                                 {
                                     MainCharacter.Orens -= price;
-                                    MainCharacter.Inventory.Items.Add(wearableItem);
 
+                                    if(ActiveBuilding.Type == BuildingType.Blacksmith)
+                                    {
+                                        // we are making the item
+
+                                        WearableItem witem = Activator.CreateInstance(wearableItem.GetType()) as WearableItem;
+                                        var multiplier = (1.0f + (ActiveBuilding.Owner.Smithing.Value / 100.0f));
+                                        witem.Description = wearableItem.Description;
+                                        witem.Name = wearableItem.Name;
+                                        witem.Power = new Ability() { Strength = (int)(wearableItem.Power.Strength * multiplier), Defence = (int)(wearableItem.Power.Defence * multiplier), Inteligence = (int)(wearableItem.Power.Inteligence * multiplier) };
+
+                                        MainCharacter.Inventory.Items.Add(witem);
+                                    }
+                                    else
+                                    {
+                                        MainCharacter.Inventory.Items.Add(wearableItem);
+                                    }
+                                    
                                     WriteLineColor($"You have know spent {GetOrenLabel(price)}.", ConsoleColor.Yellow, ConsoleColor.Black);
                                     WriteLineColor($"You now have {GetOrenLabel(MainCharacter.Orens)}", ConsoleColor.Yellow, ConsoleColor.Black);
 
@@ -168,7 +186,7 @@ namespace ConsoleApp4
                         }
                         List<Tuple<string, string, Action>> Commands = new List<Tuple<string, string, Action>>();
 
-                        Commands.Add(new Tuple<string, string, Action>($"{Commands.Count}: Leave to the Forest.", $"leave,forest,{Commands.Count}", () => { CurrentLocation = Location.Forest;  }));                        
+                        Commands.Add(new Tuple<string, string, Action>($"{Commands.Count}: Explore outside.", $"leave,outside,explore,{Commands.Count}", () => { CurrentLocation = Location.Forest;  }));                        
 
                         if (ActiveLocation == HomeTown)
                         {                            
@@ -229,77 +247,66 @@ namespace ConsoleApp4
 
                         break;
                     case Location.Building:
-                        switch (ActiveBuilding.Type)
+
+                        string Type = ActiveBuilding.Type == BuildingType.Blacksmith ? "Can you make me a " : "Can I buy some ";
+                        List<string> Commands4 = new List<string>()
                         {
-                            case BuildingType.House:
-                                break;
-                            case BuildingType.Store:
-                                input = Question(
- ActiveBuilding.Owner.Name + @": Welcome to my Store, Can I help you with something?
-0: Can I buy a weapon.
-1: Nothing, Sorry.", "0,weapon,can,buy", "1,nothing,sorry,leave");
-
-                                switch (input)
-                                {
-                                    case "0,weapon,can,buy":
-
-                                        
-                                    case "1,nothing,sorry,leave":
-                                        WriteLine($"You shut {ActiveBuilding.Owner.Name}'s door and leave the store.");
-
-                                        CurrentLocation = Location.LocationSpot;
-                                        ActiveBuilding = null;
-                                        break;
-                                }
-
-                                break;
-                            case BuildingType.Blacksmith:
-
-
-                                input = Question(
- ActiveBuilding.Owner.Name + @": Welcome to my Blacksmith, Can I help you with something?
-0: Can you make me a weapon.
-1: Can you make me a head wear.
-2: Can you make me a chest wear.
-3: Can you make me a leg wear.
-4: Can you make me a feet wear.
-5: Nothing, Sorry.", "0,weapon", "1,head", "2,chest", "3,legs", "4,feet", "5,nothing,sorry,leave");
-
-                                switch (input)
-                                {
-                                    case "0,weapon":
-                                        ProcessMakeWearableInSmith(Database.Weapons, "Weapons");
-
-                                        break;
-                                    case "1,head":
-                                        ProcessMakeWearableInSmith(Database.HeadWear, "Head Wear");
-
-                                        break;
-                                    case "2,chest":
-                                        ProcessMakeWearableInSmith(Database.ChestWear, "Chest Wear");
-
-                                        break;
-                                    case "3,legs":
-                                        ProcessMakeWearableInSmith(Database.LegWear, "leg Wear");
-
-                                        break;
-                                    case "4,feet":
-                                        ProcessMakeWearableInSmith(Database.FeetWear, "feet Wear");
-
-                                        break;
-                                    case "5,nothing,sorry,leave":
-                                        WriteLine($"You shut {ActiveBuilding.Owner.Name}'s door and leave the blacksmith.");
-
-                                        CurrentLocation = Location.LocationSpot;
-                                        ActiveBuilding = null;
-                                        break;
-                                }
+                            "0,weapon","1,head", "2,chest", "3,legs", "4,feet", "5,nothing,sorry,leave", "6,sell"
+                        };
+                        if(ActiveBuilding.Type == BuildingType.Store)
+                        {
+                            Commands4.Add("7,tool");
+                        }
+                        input = Question(string.Format(
+ActiveBuilding.Owner.Name + @": Welcome to my {1:G}, Can I help you with something?
+0: {0}weapon's.
+1: {0}head wear.
+2: {0}chest wear.
+3: {0}leg wear.
+4: {0}feet wear.
+5: Nothing, Sorry.
+6: Sell something." + (ActiveBuilding.Type == BuildingType.Store ? "\r\n7: Buy a Tool." : ""), Type, ActiveBuilding.Type), Commands4.ToArray());
+                        
+                        switch (input)
+                        {
+                            case "0,weapon":
+                                ProcessBuyOrMakeItem(Database.Weapons, "Weapons");
 
                                 break;
-                            default:
-                                break;
-                        }             
+                            case "1,head":
+                                ProcessBuyOrMakeItem(Database.HeadWear, "Head Wear");
 
+                                break;
+                            case "2,chest":
+                                ProcessBuyOrMakeItem(Database.ChestWear, "Chest Wear");
+
+                                break;
+                            case "3,legs":
+                                ProcessBuyOrMakeItem(Database.LegWear, "leg Wear");
+
+                                break;
+                            case "4,feet":
+                                ProcessBuyOrMakeItem(Database.FeetWear, "feet Wear");
+
+                                break;
+                            case "5,nothing,sorry,leave":
+                                WriteLine($"You shut {ActiveBuilding.Owner.Name}'s door and leave the {ActiveBuilding.Type.ToString("G").ToLower()}.");
+                                CurrentLocation = Location.LocationSpot;
+                                ActiveBuilding = null;
+
+                                break;
+                            case "6,sell":
+                                stats.ToSellSomething = true;
+                                Question($"What do you want to sell? Double click on the item you wish to sell", "yes", "no");
+                                
+                                CurrentLocation = Location.LocationSpot;
+                                ActiveBuilding = null;
+                                break;
+                            case "7,tool":
+                                ProcessBuyOrMakeItem(Database.Tools, "Tools");
+                                break;
+                        }
+                        
                         break;
                     case Location.Forest:
                         // some kind of person has appeared.                        
@@ -308,35 +315,19 @@ namespace ConsoleApp4
                         // get town From X Y
                         var mapItem = Map[CurrentX, CurrentY];
                         mapItem.Visible = true;
-                        
-                        if (CanIMove(CurrentX - 1, CurrentY))
-                        {
-                            Commands3.Add(new Tuple<string, string, Action>($"{Commands3.Count}: Go West?", $"west,left,{Commands3.Count}", () => {
-                                CurrentX -= 1;
-                                WriteLine("You have now moved West.");
-                            }));
-                        }
-                        if (CanIMove(CurrentX, CurrentY - 1))
-                        {
-                            Commands3.Add(new Tuple<string, string, Action>($"{Commands3.Count}: Go North?", $"north,up,{Commands3.Count}", () => {
-                                CurrentY -= 1;
-                                WriteLine("You have now moved North.");
-                            }));
-                        }
-                        if (CanIMove(CurrentX + 1, CurrentY))
-                        {
-                            Commands3.Add(new Tuple<string, string, Action>($"{Commands3.Count}: Go East?", $"east,up,{Commands3.Count}", () => {
-                                CurrentX += 1;
-                                WriteLine("You have now moved East.");
-                            }));
-                        }
-                        if (CanIMove(CurrentX, CurrentY + 1))
-                        {
-                            Commands3.Add(new Tuple<string, string, Action>($"{Commands3.Count}: Go South?", $"south,up,{Commands3.Count}", () => {
-                                CurrentY += 1;
-                                WriteLine("You have now moved South.");
-                            }));
-                        }
+
+                        Commands3.Add(new Tuple<string, string, Action>($"{Commands3.Count}: Go West?", $"west,left,{Commands3.Count}", () => {
+                            stats.ProcessMovement(CurrentX - 1, CurrentY);
+                        }));
+                        Commands3.Add(new Tuple<string, string, Action>($"{Commands3.Count}: Go North?", $"north,up,{Commands3.Count}", () => {
+                            stats.ProcessMovement(CurrentX, CurrentY - 1);
+                        }));
+                        Commands3.Add(new Tuple<string, string, Action>($"{Commands3.Count}: Go East?", $"east,up,{Commands3.Count}", () => {
+                            stats.ProcessMovement(CurrentX + 1, CurrentY);
+                        }));
+                        Commands3.Add(new Tuple<string, string, Action>($"{Commands3.Count}: Go South?", $"south,up,{Commands3.Count}", () => {
+                            stats.ProcessMovement(CurrentX, CurrentY + 1);
+                        }));
 
                         if (mapItem is LocationSpot )
                         {
@@ -353,7 +344,7 @@ namespace ConsoleApp4
                         }
 
                         List<string> Options3 = new List<string>();
-                        var Builder3 = new StringBuilder($"What would you like to do in the Forest?\r\n");
+                        var Builder3 = new StringBuilder($"which direction do you want to go?\r\n");
 
                         foreach (var item in Commands3)
                         {
@@ -400,7 +391,17 @@ namespace ConsoleApp4
             CanIMove(CurrentX + 1, CurrentY + 1) ;
             CanIMove(CurrentX -1, CurrentY + 1);
             CanIMove(CurrentX -1, CurrentY - 1);
-            CanIMove(CurrentX + 1, CurrentY - 1);            
+            CanIMove(CurrentX + 1, CurrentY - 1);
+
+            CanIMove(CurrentX + 2, CurrentY + 2);
+            CanIMove(CurrentX - 2, CurrentY + 2);
+            CanIMove(CurrentX - 2, CurrentY - 2);
+            CanIMove(CurrentX + 2, CurrentY - 2);
+
+            CanIMove(CurrentX + 2, CurrentY);
+            CanIMove(CurrentX, CurrentY + 2);
+            CanIMove(CurrentX, CurrentY - 2);
+            CanIMove(CurrentX - 2, CurrentY);
         }
 
         public bool CanIMove(int x, int y)
@@ -414,6 +415,15 @@ namespace ConsoleApp4
                 return false;
             mapItem.Visible = true;
             return mapItem is Ground || mapItem is Road || mapItem is LocationSpot;
+        }
+
+        public MapItem GetMapItem(int x, int y)
+        {
+            if (x < 0 || x > Map.GetLength(0) - 1 || y < 0 || y > Map.GetLength(0) - 1)
+            {
+                return null;
+            }
+            return Map[x, y];            
         }
 
         public void Save(bool writeToConsole = true)
@@ -579,7 +589,7 @@ Try to Flee.",
             return false;
         }
 
-        public string GetOrenLabel(int value)
+        public static string GetOrenLabel(int value)
         {
             return value == 1 ? $"{value} oren" : $"{value} oren's";            
         }

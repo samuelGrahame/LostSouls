@@ -82,26 +82,42 @@ namespace ConsoleApp4
             world.MapRawData = RawData;
         }
 
-        public bool IsTree(Color color)
+        public static Color GetColor(MapItem item)
+        {
+            if (item is Tree)
+                return Color.FromArgb(41, 98, 40);
+            else if (item is Water)
+                return Color.FromArgb(79, 117, 247);
+            else if (item is Ground)
+                return Color.FromArgb(111, 185, 66);
+            else if (item is LocationSpot)
+                return Color.FromArgb(255, 15, 15);
+            else if (item is Road)
+                return Color.FromArgb(147, 147, 147);
+            else
+                return Color.FromArgb(111, 185, 66);
+        }
+
+        public static bool IsTree(Color color)
         {
             return color == Color.FromArgb(41, 98, 40);
         }
 
-        public bool IsWater(Color color)
+        public static bool IsWater(Color color)
         {
             return color == Color.FromArgb(79, 117, 247);
         }
-        public bool IsCity(Color color)
+        public static bool IsCity(Color color)
         {
             return color == Color.FromArgb(255, 15, 15);
         }
 
-        public bool IsPath(Color color)
+        public static bool IsPath(Color color)
         {
             return color == Color.FromArgb(147, 147, 147);
         }
 
-        public bool IsGround(Color color)
+        public static bool IsGround(Color color)
         {
             return color == Color.FromArgb(111, 185, 66);
         }

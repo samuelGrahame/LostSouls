@@ -259,5 +259,12 @@ namespace ConsoleApp4
         public static List<LegsItem> LegWear = new List<LegsItem>();
         public static List<FeetItem> FeetWear = new List<FeetItem>();
         public static List<ChestItem> ChestWear = new List<ChestItem>();
+
+        public static List<ToolItem> Tools = new List<ToolItem>()
+        {
+            new Hammer(),
+            new WoodCutters_Axe(),
+            new Fishing_Rod()
+        };
     }
 }

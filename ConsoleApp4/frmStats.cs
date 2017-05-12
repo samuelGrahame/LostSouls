@@ -15,6 +15,26 @@ namespace ConsoleApp4
     public partial class frmStats : Form
     {
         public Humanoid ActiveHuman;
+        public World ActiveWorld;
+
+        public bool ToSellSomething = false; // if tosellsomething is true - and when we double click on a inventory item - to sell the item, giving the value of the item to main character in orens, destroying the item. then send back to the console yes - after we double click or if the user says no - we set tosellsomething to false.
+        // operators: == Is Equal to the Value returns true or false
+        // = Set Equal to the Value: returns the value
+        // x = 10;
+        // if(x == 10)
+      //   {
+      //
+    ////     }
+
+    //    public void SetValue(ref object value1, object value2)
+    //    {
+    //        value1 = value2;
+    //    }
+
+    //    public new bool Equals(object value1, object value2)
+    //    {
+    //        return value1 == value2;
+    //    }
 
         public frmStats()
         {
@@ -38,25 +58,27 @@ namespace ConsoleApp4
             }
             else
             {
-                var img = pictureBox1.Image;
-
-                if (img != null)
-                    img.Dispose();
-
-                pictureBox1.Image = null;
-
-                var rawMap = new Bitmap(world.MapRawData);
+                ActiveWorld = world;
+                
+                var rawMap = world.MapRawData;
 
                 foreach (var mapItem in world.Map)
                 {
                     if(!mapItem.Visible)
                     {
                         rawMap.SetPixel(mapItem.X, mapItem.Y, Color.Black);
+                    }else
+                    {
+                        var color = MapData.GetColor(mapItem);
+                        if (rawMap.GetPixel(mapItem.X, mapItem.Y) != color)
+                        {
+                            rawMap.SetPixel(mapItem.X, mapItem.Y, color);
+                        }
                     }
-                }
-
+                } 
                 rawMap.SetPixel(world.CurrentX, world.CurrentY, Color.White);
-                pictureBox1.Image = rawMap;
+
+                pictureBox1.Image = world.MapRawData;
             }
         }
 
@@ -115,7 +137,8 @@ namespace ConsoleApp4
                 AddRowToEquipt(dt, livingEntity.Legs);
                 AddRowToEquipt(dt, livingEntity.Feet);
                 AddRowToEquipt(dt, livingEntity.Hands);
-                
+                AddRowToEquipt(dt, livingEntity.Belt);
+
                 dt.AcceptChanges();
 
                 var dt2 = new DataTable();
@@ -127,8 +150,14 @@ namespace ConsoleApp4
                 foreach (Item item in livingEntity.Inventory.Items)
                 {
                     DataRow dr = dt2.NewRow();
+                    string name = item.Name;
 
-                    dr["Name"] = item.Name;                   
+                    if(item is ResourceItem)
+                    {
+                        name = (item as ResourceItem).Quantity + " " + name;
+                    }
+
+                    dr["Name"] = name;                   
                     dr["Description"] = item.Description;
                     dr["Item"] = item;
 
@@ -265,63 +294,129 @@ namespace ConsoleApp4
 
             if (ActiveHuman.Inventory.Items.Contains(item))
             {
-                if (item is WearableItem)
+                if(ToSellSomething)
                 {
-                    var typeofValue = item.GetType();
-                    if (item is HeadItem)
+                    int price = 0;
+                    if (item is UseItem)
                     {
-                        if (ActiveHuman.Head != null)
-                        {
-                            ActiveHuman.Inventory.Items.Add(ActiveHuman.Head);
-                            ActiveHuman.Head = null;
-                        }
+                        var itemU = (UseItem)item;
 
-                        ActiveHuman.Head = (HeadItem)item;
-                    }
-                    else if (item is ChestItem)
+                        price = itemU.Price;
+                    }else if (item is ToolItem)
                     {
-                        if (ActiveHuman.Chest != null)
-                        {
-                            ActiveHuman.Inventory.Items.Add(ActiveHuman.Chest);
-                            ActiveHuman.Chest = null;
-                        }
-                        ActiveHuman.Chest = (ChestItem)item;
+                        var itemU = (ToolItem)item;
+
+                        price = itemU.Price;
                     }
-                    else if (item is LegsItem)
+                    else if (item is ResourceItem)
                     {
-                        if (ActiveHuman.Legs != null)
-                        {
-                            ActiveHuman.Inventory.Items.Add(ActiveHuman.Legs);
-                            ActiveHuman.Legs = null;
-                        }
-                        ActiveHuman.Legs = (LegsItem)item;
+                        var itemU = (ResourceItem)item;
+
+                        price = itemU.Price * itemU.Quantity;
                     }
-                    else if (item is FeetItem)
+                    else if(item is WearableItem)
                     {
-                        if (ActiveHuman.Feet != null)
-                        {
-                            ActiveHuman.Inventory.Items.Add(ActiveHuman.Feet);
-                            ActiveHuman.Feet = null;
-                        }
-                        ActiveHuman.Feet = (FeetItem)item;
+                        var itemW = (WearableItem)item;
+
+                        price = (itemW.Power.Strength + 1) * (itemW.Power.Inteligence + 1) * (itemW.Power.Defence + 1);
                     }
-                    else if (item is WeaponItem)
-                    {
-                        if (ActiveHuman.Hands != null)
-                        {
-                            ActiveHuman.Inventory.Items.Add(ActiveHuman.Hands);
-                            ActiveHuman.Hands = null;
-                        }
-                        ActiveHuman.Hands = (WeaponItem)item;
-                    }
+                    
+                    ActiveHuman.Orens += price;
+                    
                     ActiveHuman.Inventory.Items.Remove(item);
+                    
+                    ToSellSomething = false;
+
+                    Program.WriteLineColor($"You have sold the item for {World.GetOrenLabel(price)}.", ConsoleColor.Yellow, ConsoleColor.Black);
+                    Program.WriteLineColor($"You now have {World.GetOrenLabel(ActiveHuman.Orens)}", ConsoleColor.Yellow, ConsoleColor.Black);
 
                     UpdateStats(ActiveHuman);
+                    
+                    WriteLineProcess("yes");
+
+                    
+                    // then we need to set the value of ToSellSomething to false. // (we set the value to false when we create the variable ToSellSomething)                    
                 }
                 else
                 {
+                    if (item is WearableItem)
+                    {
+                        var typeofValue = item.GetType();
+                        if (item is HeadItem)
+                        {
+                            if (ActiveHuman.Head != null)
+                            {
+                                ActiveHuman.Inventory.Items.Add(ActiveHuman.Head);
+                                ActiveHuman.Head = null;
+                            }
 
+                            ActiveHuman.Head = (HeadItem)item;
+                        }
+                        else if (item is ChestItem)
+                        {
+                            if (ActiveHuman.Chest != null)
+                            {
+                                ActiveHuman.Inventory.Items.Add(ActiveHuman.Chest);
+                                ActiveHuman.Chest = null;
+                            }
+                            ActiveHuman.Chest = (ChestItem)item;
+                        }
+                        else if (item is LegsItem)
+                        {
+                            if (ActiveHuman.Legs != null)
+                            {
+                                ActiveHuman.Inventory.Items.Add(ActiveHuman.Legs);
+                                ActiveHuman.Legs = null;
+                            }
+                            ActiveHuman.Legs = (LegsItem)item;
+                        }
+                        else if (item is FeetItem)
+                        {
+                            if (ActiveHuman.Feet != null)
+                            {
+                                ActiveHuman.Inventory.Items.Add(ActiveHuman.Feet);
+                                ActiveHuman.Feet = null;
+                            }
+                            ActiveHuman.Feet = (FeetItem)item;
+                        }
+                        else if (item is WeaponItem)
+                        {
+                            if (ActiveHuman.Hands != null)
+                            {
+                                ActiveHuman.Inventory.Items.Add(ActiveHuman.Hands);
+                                ActiveHuman.Hands = null;
+                            }
+                            ActiveHuman.Hands = (WeaponItem)item;
+                        }
+                        else if (item is ToolItem)
+                        {
+                            if (ActiveHuman.Belt != null)
+                            {
+                                ActiveHuman.Inventory.Items.Add(ActiveHuman.Belt);
+                                ActiveHuman.Belt = null;
+                            }
+                            if(ActiveHuman.GetWearablePower().Inteligence >= ((ToolItem)item).Requirements)
+                            {
+                                ActiveHuman.Belt = (ToolItem)item;
+                            }
+                            else
+                            {
+                                Program.WriteLineColor($"You do not meet the requirements to wear {item.Name} you require {((ToolItem)item).Requirements} Inteligence.", ConsoleColor.Red, ConsoleColor.Black);
+
+                                UpdateStats(ActiveHuman);
+                                return;
+                            }
+                        }
+                        ActiveHuman.Inventory.Items.Remove(item);
+
+                        UpdateStats(ActiveHuman);
+                    }
+                    else
+                    {
+
+                    }
                 }
+                
             }
             else
             {
@@ -380,6 +475,14 @@ namespace ConsoleApp4
                             ActiveHuman.Hands = null;
                         }
                     }
+                    else if (item is ToolItem)
+                    {
+                        if (ActiveHuman.Belt == item)
+                        {
+                            ActiveHuman.Inventory.Items.Add(ActiveHuman.Belt);
+                            ActiveHuman.Belt = null;
+                        }
+                    }
 
                     UpdateStats(ActiveHuman);
                 }
@@ -419,12 +522,9 @@ namespace ConsoleApp4
 
         public void WriteLineProcess(string value)
         {
-            Program.ExternalResponce = value;
-            var hWnd = System.Diagnostics.Process.GetCurrentProcess().MainWindowHandle;
-
-            SetForegroundWindow(GetConsoleWindow());
-
-            PostMessage(hWnd, WM_KEYDOWN, VK_RETURN, 0);
+            Program.ExternalResponce = value;            
+            
+            PostMessage(GetConsoleWindow(), WM_KEYDOWN, VK_RETURN, 0);
             
             Application.DoEvents();
         }
@@ -436,27 +536,132 @@ namespace ConsoleApp4
 
         private void button5_Click(object sender, EventArgs e)
         {
-            WriteLineProcess("East");
+            if (ActiveWorld.CanIMove(ActiveWorld.CurrentX + 1, ActiveWorld.CurrentY))
+            {
+                WriteLineProcess("East");
+            }
+            else
+            {
+                ProcessCommand(ActiveWorld.CurrentX + 1, ActiveWorld.CurrentY);
+            }
         }
 
         private void button8_Click(object sender, EventArgs e)
         {
-            WriteLineProcess("South");
+            if (ActiveWorld.CanIMove(ActiveWorld.CurrentX, ActiveWorld.CurrentY + 1))
+            {
+                WriteLineProcess("South");
+            }
+            else
+            {
+                ProcessCommand(ActiveWorld.CurrentX, ActiveWorld.CurrentY + 1);
+            }
         }
 
         private void button6_Click(object sender, EventArgs e)
         {
-            WriteLineProcess("West");
+            if (ActiveWorld.CanIMove(ActiveWorld.CurrentX - 1, ActiveWorld.CurrentY))
+            {
+                WriteLineProcess("West");
+            }
+            else
+            {
+                ProcessCommand(ActiveWorld.CurrentX - 1, ActiveWorld.CurrentY);
+            }
         }
 
         private void button4_Click(object sender, EventArgs e)
         {
-            WriteLineProcess("North");
+            if(ActiveWorld.CanIMove(ActiveWorld.CurrentX, ActiveWorld.CurrentY - 1))
+            {
+                WriteLineProcess("North");
+            }
+            else
+            {
+                ProcessCommand(ActiveWorld.CurrentX, ActiveWorld.CurrentY - 1);                
+            }
+        }
+
+        public void ProcessMovement(int x, int y)
+        {
+            if(ActiveWorld.CanIMove(x, y))
+            {
+                ActiveWorld.CurrentX = x;
+                ActiveWorld.CurrentY = y;
+            }
+            else
+            {
+                ProcessCommand(x, y);
+            }
+            UpdateWorld(ActiveWorld);
+        }
+
+        public void ProcessCommand(int x, int y)
+        {
+            if (ActiveHuman.Belt == null)
+            {
+                return;
+            }
+
+            var mapItem = ActiveWorld.GetMapItem(x, y);
+
+            if (mapItem == null)
+                return;
+
+            if(mapItem is Tree)
+            {
+                if(ActiveHuman.Belt is WoodCutters_Axe)
+                {
+                    mapItem = new Ground() { X = mapItem.X, Visible = true, Y = mapItem.Y } ;
+
+                    ActiveHuman.Inventory.AddOrRemoveResourceItem(typeof(Wood), 1);
+
+                    if(ActiveWorld.Percent(25))
+                    {
+                        ActiveHuman.Inventory.AddOrRemoveResourceItem(typeof(TreeSeeds), 1);
+                    }
+
+                    ActiveWorld.Map[x, y] = mapItem;
+
+                    UpdateWorld(ActiveWorld);
+
+                    UpdateStats(ActiveHuman);
+                }
+            }
+            else if (mapItem is Water)
+            {
+                if (ActiveHuman.Belt is Fishing_Rod)
+                {
+                    // some kind of random event - to add fish
+                    if (ActiveWorld.Percent(25))
+                    {
+                        ActiveHuman.Inventory.AddOrRemoveResourceItem(typeof(Fish), 1);
+                    }
+
+                    UpdateStats(ActiveHuman);                    
+                }else if (ActiveHuman.Belt is Hammer)
+                {
+                    // do we have wood
+                    if(ActiveHuman.Inventory.CanIUseResource(typeof(Wood), 10))
+                    {
+                        mapItem = new Road() { X = mapItem.X, Visible = true, Y = mapItem.Y };
+
+                        ActiveHuman.Inventory.AddOrRemoveResourceItem(typeof(Wood), -10);
+                        
+                        ActiveWorld.Map[x, y] = mapItem;
+
+                        UpdateWorld(ActiveWorld);
+                        UpdateStats(ActiveHuman);
+                    }
+                    
+                }
+            }
+
         }
 
         private void button9_Click(object sender, EventArgs e)
         {
-            WriteLineProcess("Forest");
+            WriteLineProcess("Outside");
         }
 
         private void button10_Click(object sender, EventArgs e)
@@ -502,6 +707,21 @@ namespace ConsoleApp4
         private void button17_Click(object sender, EventArgs e)
         {
             WriteLineProcess("5");
+        }
+
+        private void button19_Click(object sender, EventArgs e)
+        {
+            WriteLineProcess("6");
+        }
+
+        private void button20_Click(object sender, EventArgs e)
+        {
+            WriteLineProcess("7");
+        }
+
+        private void button21_Click(object sender, EventArgs e)
+        {
+            WriteLineProcess("8");
         }
     }
 }

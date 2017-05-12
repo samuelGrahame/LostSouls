@@ -51,10 +51,16 @@
   <ItemGroup>
     <Compile Include="Ability.cs" />
     <Compile Include="Bag.cs" />
+    <Compile Include="Fish.cs" />
+    <Compile Include="Fishing Rod.cs" />
+    <Compile Include="Hammer.cs" />
     <Compile Include="MapData.cs" />
     <Compile Include="MapPictureBox.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="ResourceItem.cs" />
+    <Compile Include="ToolItem.cs" />
+    <Compile Include="TreeSeeds.cs" />
     <Compile Include="UseItem.cs" />
     <Compile Include="FeetItem.cs" />
     <Compile Include="FemaleNames.cs" />
@@ -89,6 +95,8 @@
     <Compile Include="ChestItem.cs" />
     <Compile Include="WeaponItem.cs" />
     <Compile Include="WearableItem.cs" />
+    <Compile Include="Wood.cs" />
+    <Compile Include="WoodCutters Axe.cs" />
     <Compile Include="World.cs" />
   </ItemGroup>
   <ItemGroup>
