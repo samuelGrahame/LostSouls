@@ -11,6 +11,7 @@ namespace ConsoleApp4
         public Fish()
         {
             Price = 17;
-        } 
+            Description = "Allows you to heal Health";
+        }
     }
 }

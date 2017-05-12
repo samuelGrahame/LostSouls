@@ -11,6 +11,7 @@ namespace ConsoleApp4
         public TreeSeeds()
         {
             Price = 300;
+            Description = "Allows you to plant trees";
         }
     }
 }

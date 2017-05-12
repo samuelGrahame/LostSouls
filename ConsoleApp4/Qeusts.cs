@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 
 namespace ConsoleApp4
 {
-    public class Wood : ResourceItem
+    public class Qeusts : ToolItem      
     {
-        public Wood()
+        public Qeusts()
         {
-            Price = 36;
-            Description = "Allows you to build bridge's";
+            Price = 0;
+           Description = "Allows you to activate Qeusts";        
         }
     }
 }

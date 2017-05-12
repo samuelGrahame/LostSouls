@@ -31,7 +31,8 @@ namespace ConsoleApp4
         public MapItem[,] Map = null;
 
         public LocationSpot ActiveLocation = null;
-                
+        public ForestEvent CurrentForestEvent = ForestEvent.None;
+
         public int CurrentX { get; set; } = 0;
         public int CurrentY { get; set; } = 0;
 
@@ -172,11 +173,13 @@ namespace ConsoleApp4
                 MakeVisible();
                 Program.stats.UpdateWorld(this);
 
+                
+
                 switch (CurrentLocation)
                 {
                     case Location.LocationSpot:
                         ActiveBuilding = null;
-
+                        CurrentForestEvent = ForestEvent.None;
                         if (MainCharacter.Health < MainCharacter.MaxHealth)
                         {
                             MainCharacter.AddHealth(MainCharacter.MaxHealth - MainCharacter.Health);
@@ -247,7 +250,7 @@ namespace ConsoleApp4
 
                         break;
                     case Location.Building:
-
+                        CurrentForestEvent = ForestEvent.None;
                         string Type = ActiveBuilding.Type == BuildingType.Blacksmith ? "Can you make me a " : "Can I buy some ";
                         List<string> Commands4 = new List<string>()
                         {
@@ -304,12 +307,18 @@ ActiveBuilding.Owner.Name + @": Welcome to my {1:G}, Can I help you with somethi
                                 break;
                             case "7,tool":
                                 ProcessBuyOrMakeItem(Database.Tools, "Tools");
+
                                 break;
+                            case "8,Qeust":
+                                //ProcessBuyOrMakeItem(Database.Qeust, "Qeust");// ghehe
+                                break;
+
                         }
                         
                         break;
                     case Location.Forest:
-                        // some kind of person has appeared.                        
+                        // some kind of person has appeared.     
+                        CurrentForestEvent = ForestEvent.None;
                         List<Tuple<string, string, Action>> Commands3 = new List<Tuple<string, string, Action>>();
 
                         // get town From X Y
@@ -438,7 +447,8 @@ ActiveBuilding.Owner.Name + @": Welcome to my {1:G}, Can I help you with somethi
             if(Percent(50)) // 100 / 2 = 50%
             {
                 if(Percent(25)) // 100 / 4 = 25%
-                {                                        
+                {
+                    CurrentForestEvent = ForestEvent.Battle;
                     var Enemies = new Humanoid();
 
                     Enemies.Gender = (Gender)random.Next(2);
@@ -458,6 +468,8 @@ ActiveBuilding.Owner.Name + @": Welcome to my {1:G}, Can I help you with somethi
                     {
                         WriteLine($"Your current location is now {CurrentX}, {CurrentY}.");
                     }
+                    CurrentForestEvent = ForestEvent.None;
+                    stats.UpdateWorld(this);
                 }
                 else if (Percent(10))
                 {                        
@@ -468,12 +480,13 @@ ActiveBuilding.Owner.Name + @": Welcome to my {1:G}, Can I help you with somethi
                     WriteLineColor($"You now have {GetOrenLabel(MainCharacter.Orens)}", ConsoleColor.Yellow, ConsoleColor.Black);                    
                 } else if (Percent(10))
                 {
+                    CurrentForestEvent = ForestEvent.Stranger;
                     var person = new Humanoid();
                     person.Gender = (Gender)random.Next(2);
                     person.Race = (Race)random.Next(3);
                     person.SetRandomNewName();
                     person.SetLevel(random.Next(MainCharacter.CombatLevel.Value + 5));
-
+                    stats.UpdateWorld(this);
                     WriteLineColor($"Stranger approachers...\r\n i'm looking for somewhere to live", ConsoleColor.Red, ConsoleColor.Black);
                     string input = Question("Do you want to help this stranger?", "no","yes");
                     if (input == "yes")
@@ -526,7 +539,7 @@ ActiveBuilding.Owner.Name + @": Welcome to my {1:G}, Can I help you with somethi
 
                         WriteLineColor($"You received {xp} xp for Barter Skill.", ConsoleColor.DarkCyan, ConsoleColor.Black);
 
-                        HomeTown.PeopleWhoLiveHere.Add(person);
+                        HomeTown.PeopleWhoLiveHere.Add(person);                        
                     }
                     else
                     {
@@ -540,6 +553,8 @@ ActiveBuilding.Owner.Name + @": Welcome to my {1:G}, Can I help you with somethi
 
                         UpdateStats(MainCharacter);
                     }
+                    CurrentForestEvent = ForestEvent.None;
+                    stats.UpdateWorld(this);
                     WriteLine($"Your current location is now {CurrentX}, {CurrentY}.");
                 }
             }
@@ -611,7 +626,8 @@ Try to Flee.",
         }
 
         public void ProcessAttackScreen(Humanoid Enemy)
-        {            
+        {
+            stats.UpdateWorld(this);
             while (Enemy.IsAlive() && MainCharacter.IsAlive())
             {
                 Humanoid FirstAttacker = MainCharacter.GetWearablePower().Defence <= Enemy.GetWearablePower().Defence ? MainCharacter : Enemy;
@@ -694,6 +710,13 @@ Try to Flee.",
             }
         }
 	}
+
+    public enum ForestEvent
+    {
+        None,
+        Stranger,
+        Battle
+    }
 
     public enum Location
     {

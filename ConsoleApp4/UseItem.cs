@@ -9,7 +9,8 @@ namespace ConsoleApp4
     public class UseItem : Item
     {
         public int Health { get; set; }
-        public int Price { get; set; }        
+        public int Price { get; set; }
+        public int Fish { get; set; }
     }
 }
 

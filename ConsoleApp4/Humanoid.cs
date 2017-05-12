@@ -25,6 +25,7 @@ namespace ConsoleApp4
         public int AvailablePowerPoints { get; set; } = 0;
         public Level CombatLevel { get; set; }
         public ToolItem Belt { get; set; }
+        public int Qeusts  { get; set; }
 
 
         public Level Smithing { get; set; } = new Level();

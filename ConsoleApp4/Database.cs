@@ -10,8 +10,8 @@ using Newtonsoft.Json;
 
 namespace ConsoleApp4
 {
-	public static class Database
-	{
+    public static class Database
+    {
         /*
 		 * sword
 		 * mace
@@ -71,15 +71,15 @@ namespace ConsoleApp4
                 return Image.FromStream(mem);
             }
         }
-        
 
-    //Public Function Base64ToImage(ByVal nString As String) As Image
-    //    If nString = "" Then Return Nothing
-    //    Dim buffer = Convert.FromBase64String(nString)
-    //    Dim Mem As New MemoryStream(buffer)
 
-    //    Return Image.FromStream(Mem)
-    //End Function
+        //Public Function Base64ToImage(ByVal nString As String) As Image
+        //    If nString = "" Then Return Nothing
+        //    Dim buffer = Convert.FromBase64String(nString)
+        //    Dim Mem As New MemoryStream(buffer)
+
+        //    Return Image.FromStream(Mem)
+        //End Function
 
         public static MapData LoadMap()
         {
@@ -100,9 +100,9 @@ namespace ConsoleApp4
                 Directory.CreateDirectory("Database/Map/");
             }
             mapdata.RawDataString = ImageToBase65(mapdata.RawData);
-            File.WriteAllText("Database/Map/map.json", PackObject(mapdata));            
+            File.WriteAllText("Database/Map/map.json", PackObject(mapdata));
         }
-        
+
         public static void SaveWorld(World world)
         {
             if (!Directory.Exists("Database/"))
@@ -115,7 +115,7 @@ namespace ConsoleApp4
                 Directory.CreateDirectory("Database/Saves/");
             }
             world.MapRawDataString = ImageToBase65(world.MapRawData);
-            File.WriteAllText("Database/Saves/save.json", PackObject(world));            
+            File.WriteAllText("Database/Saves/save.json", PackObject(world));
         }
 
         public static bool LoadWorld(out World world)
@@ -134,18 +134,18 @@ namespace ConsoleApp4
                     }
                     catch (Exception)
                     {
-                        
+
                     }
                 }
             }
 
             return false;
         }
-        
+
         public static void CreateDirectoryIfNotExist(string path)
         {
-            if (!Directory.Exists(path))            
-                Directory.CreateDirectory(path);            
+            if (!Directory.Exists(path))
+                Directory.CreateDirectory(path);
         }
 
         public static void SaveWearable(WearableItem item, string filePath)
@@ -158,7 +158,7 @@ namespace ConsoleApp4
             {
 
             }
-            
+
         }
 
         public static void ClearDirectory(string filePath)
@@ -209,7 +209,7 @@ namespace ConsoleApp4
         }
 
         public static void LoadData()
-		{
+        {
             CreateDirectoryIfNotExist("Database/");
             CreateDirectoryIfNotExist("Database/Weapons/");
             CreateDirectoryIfNotExist("Database/HeadWear/");
@@ -217,7 +217,7 @@ namespace ConsoleApp4
             CreateDirectoryIfNotExist("Database/FeetWear/");
             CreateDirectoryIfNotExist("Database/ChestWear/");
             CreateDirectoryIfNotExist("Database/Map/");
-            
+
             foreach (var filePath in Directory.GetFiles("Database/Weapons/"))
             {
                 Database.LoadWearable(filePath, Weapons, new WeaponItem());
@@ -238,8 +238,8 @@ namespace ConsoleApp4
             {
                 Database.LoadWearable(filePath, ChestWear, new ChestItem());
             }
-		}
-        
+        }
+
         public static void LoadWearable(string filePath, IList list, WearableItem item)
         {
             string fileData = File.ReadAllText(filePath);
@@ -266,5 +266,14 @@ namespace ConsoleApp4
             new WoodCutters_Axe(),
             new Fishing_Rod()
         };
-    }
+    }        
 }
+    
+
+
+
+
+
+
+
+

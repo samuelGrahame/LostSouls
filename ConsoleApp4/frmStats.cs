@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -12,6 +13,7 @@ using System.Windows.Forms;
 
 namespace ConsoleApp4
 {
+    
     public partial class frmStats : Form
     {
         public Humanoid ActiveHuman;
@@ -60,6 +62,51 @@ namespace ConsoleApp4
             {
                 ActiveWorld = world;
                 
+                if(world.CurrentLocation == ConsoleApp4.Location.Building)
+                {
+                    labelTitle.Text = $"{world.ActiveBuilding.Owner.Name}'s {world.ActiveBuilding.Type.ToString("G").ToLower()}";
+
+                    labelTitle.ForeColor = Color.White;
+                    labelTitle.BackColor = Color.Purple;
+                }else if (world.CurrentLocation == ConsoleApp4.Location.Forest)
+                {
+                    switch (world.CurrentForestEvent)
+                    {
+                        case ForestEvent.None:
+                            labelTitle.Text = $"Outside";
+
+                            labelTitle.ForeColor = Color.White;
+                            labelTitle.BackColor = Color.Green;
+
+                            break;
+                        case ForestEvent.Stranger:
+                            labelTitle.Text = $"Stranger";
+
+                            labelTitle.ForeColor = Color.White;
+                            labelTitle.BackColor = Color.DarkOrange;
+
+                            break;
+                        case ForestEvent.Battle:
+                            labelTitle.Text = $"Battle!!";
+
+                            labelTitle.ForeColor = Color.White;
+                            labelTitle.BackColor = Color.Red;
+
+                            break;
+                        default:
+                            break;
+                    }
+
+                    
+                }
+                else if (world.CurrentLocation == ConsoleApp4.Location.LocationSpot)
+                {
+                    labelTitle.Text = $"{world.ActiveLocation.Name}";
+
+                    labelTitle.ForeColor = Color.White;
+                    labelTitle.BackColor = Color.Blue;
+                }
+
                 var rawMap = world.MapRawData;
 
                 foreach (var mapItem in world.Map)
@@ -236,7 +283,7 @@ namespace ConsoleApp4
         
         private void frmStats_Load(object sender, EventArgs e)
         {
-
+            Console.SetOut(new ControlWriter(textBox2));
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -395,7 +442,7 @@ namespace ConsoleApp4
                                 ActiveHuman.Inventory.Items.Add(ActiveHuman.Belt);
                                 ActiveHuman.Belt = null;
                             }
-                            if(ActiveHuman.GetWearablePower().Inteligence >= ((ToolItem)item).Requirements)
+                            if (ActiveHuman.GetWearablePower().Inteligence >= ((ToolItem)item).Requirements)
                             {
                                 ActiveHuman.Belt = (ToolItem)item;
                             }
@@ -411,9 +458,27 @@ namespace ConsoleApp4
 
                         UpdateStats(ActiveHuman);
                     }
-                    else
+                    else if (item is Fish)
                     {
+                        if (ActiveHuman.Inventory.CanIUseResource(typeof(Fish), 1))
+                        {
+                            ActiveHuman.Inventory.AddOrRemoveResourceItem(typeof(Fish), -1);
 
+                            ActiveHuman.AddHealth(10);
+
+                            Program.WriteLineColor("You just ate a fish and you healed 10 health.", ConsoleColor.Green, ConsoleColor.Black);
+
+                            UpdateStats(ActiveHuman);
+                        }
+                        else if (item is Fish)
+                        {
+                            if (ActiveHuman.Inventory.CanIUseResource(typeof(Qeusts), 1))
+                            {
+                                ActiveHuman.Inventory.AddOrRemoveResourceItem(typeof(Qeusts), -1);
+
+                                UpdateStats(ActiveHuman);
+                            }
+                        }
                     }
                 }
                 
@@ -723,5 +788,54 @@ namespace ConsoleApp4
         {
             WriteLineProcess("8");
         }
+        
+        private void textBox1_KeyDown(object sender, KeyEventArgs e)
+        {
+            if(e.KeyCode == Keys.Enter)
+            {
+                WriteLineProcess(textBox1.Text);
+                textBox1.Text = "";
+            }
+        }
     }
+
+    public class ControlWriter : TextWriter
+    {
+        private Control textbox;
+        public ControlWriter(Control textbox)
+        {
+            this.textbox = textbox;
+        }
+
+        public override void Write(char value)
+        {
+            WriteText(new string(new char[] { value }));
+        }
+
+        delegate void VoidWtihText(string value);
+
+        public void WriteText(string value)
+        {
+            if (textbox.InvokeRequired)
+            {
+                VoidWtihText d = new VoidWtihText(WriteText);
+                textbox.Invoke(d, new object[] { value });
+            }
+            else
+            {
+                ((TextBox)textbox).AppendText(value);                
+            }
+        }
+
+        public override void Write(string value)
+        {
+            WriteText(value);
+        }
+
+        public override Encoding Encoding
+        {
+            get { return Encoding.ASCII; }
+        }
+    }
+
 }
