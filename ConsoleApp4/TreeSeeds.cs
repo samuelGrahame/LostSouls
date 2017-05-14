@@ -11,7 +11,7 @@ namespace ConsoleApp4
         public TreeSeeds()
         {
             Price = 300;
-            Description = "Allows you to plant trees";
+            Description = "Allows you to get value for quest/selling";
         }
     }
 }

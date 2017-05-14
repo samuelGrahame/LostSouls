@@ -11,6 +11,7 @@ namespace ConsoleApp4
         public int Health { get; set; }
         public int Price { get; set; }
         public int Fish { get; set; }
+        public int TreeSeeds { get; set; }
     }
 }
 

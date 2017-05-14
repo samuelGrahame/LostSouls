@@ -31,7 +31,7 @@ namespace ConsoleApp4
             {
                 RawData = Database.LoadMap();
             }
-            catch (Exception a)
+            catch (Exception)
             {
                 
             }

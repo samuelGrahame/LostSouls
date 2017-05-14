@@ -49,6 +49,8 @@
             this.dataInventory = new System.Windows.Forms.DataGridView();
             this.pictureBox1 = new ConsoleApp4.PictureBoxWithInterpolationMode();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.labelDay = new System.Windows.Forms.Label();
+            this.labelTime = new System.Windows.Forms.Label();
             this.button21 = new System.Windows.Forms.Button();
             this.button20 = new System.Windows.Forms.Button();
             this.button19 = new System.Windows.Forms.Button();
@@ -71,7 +73,11 @@
             this.labelTitle = new System.Windows.Forms.Label();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.textBox2 = new System.Windows.Forms.TextBox();
-            this.textBox3 = new System.Windows.Forms.TextBox();
+            this.tabControl1 = new System.Windows.Forms.TabControl();
+            this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.groupBox5 = new System.Windows.Forms.GroupBox();
+            this.gridQuests = new System.Windows.Forms.DataGridView();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -83,6 +89,11 @@
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.groupBox3.SuspendLayout();
             this.groupBox4.SuspendLayout();
+            this.tabControl1.SuspendLayout();
+            this.tabPage2.SuspendLayout();
+            this.tabPage1.SuspendLayout();
+            this.groupBox5.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.gridQuests)).BeginInit();
             this.SuspendLayout();
             // 
             // labelStrength
@@ -245,7 +256,8 @@
             // 
             // splitContainer1
             // 
-            this.splitContainer1.Location = new System.Drawing.Point(5, 236);
+            this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitContainer1.Location = new System.Drawing.Point(3, 3);
             this.splitContainer1.Name = "splitContainer1";
             this.splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
@@ -256,8 +268,8 @@
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.groupBox2);
-            this.splitContainer1.Size = new System.Drawing.Size(363, 401);
-            this.splitContainer1.SplitterDistance = 165;
+            this.splitContainer1.Size = new System.Drawing.Size(349, 347);
+            this.splitContainer1.SplitterDistance = 142;
             this.splitContainer1.TabIndex = 2;
             // 
             // groupBox1
@@ -266,7 +278,7 @@
             this.groupBox1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.groupBox1.Location = new System.Drawing.Point(0, 0);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(363, 165);
+            this.groupBox1.Size = new System.Drawing.Size(349, 142);
             this.groupBox1.TabIndex = 3;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Character Equipt";
@@ -286,7 +298,7 @@
             this.dataEquipt.MultiSelect = false;
             this.dataEquipt.Name = "dataEquipt";
             this.dataEquipt.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dataEquipt.Size = new System.Drawing.Size(357, 146);
+            this.dataEquipt.Size = new System.Drawing.Size(343, 123);
             this.dataEquipt.TabIndex = 2;
             this.dataEquipt.CellBeginEdit += new System.Windows.Forms.DataGridViewCellCancelEventHandler(this.dataEquipt_CellBeginEdit);
             this.dataEquipt.CellMouseDoubleClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dataEquipt_CellMouseDoubleClick);
@@ -297,7 +309,7 @@
             this.groupBox2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.groupBox2.Location = new System.Drawing.Point(0, 0);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(363, 232);
+            this.groupBox2.Size = new System.Drawing.Size(349, 201);
             this.groupBox2.TabIndex = 4;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Character Inventory";
@@ -317,7 +329,7 @@
             this.dataInventory.MultiSelect = false;
             this.dataInventory.Name = "dataInventory";
             this.dataInventory.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dataInventory.Size = new System.Drawing.Size(357, 213);
+            this.dataInventory.Size = new System.Drawing.Size(343, 182);
             this.dataInventory.TabIndex = 3;
             this.dataInventory.CellBeginEdit += new System.Windows.Forms.DataGridViewCellCancelEventHandler(this.dataInventory_CellBeginEdit);
             this.dataInventory.CellMouseDoubleClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dataInventory_CellMouseDoubleClick);
@@ -330,12 +342,14 @@
             this.pictureBox1.Location = new System.Drawing.Point(6, 56);
             this.pictureBox1.Name = "pictureBox1";
             this.pictureBox1.Size = new System.Drawing.Size(798, 571);
-            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureBox1.TabIndex = 0;
             this.pictureBox1.TabStop = false;
             // 
             // groupBox3
             // 
+            this.groupBox3.Controls.Add(this.labelDay);
+            this.groupBox3.Controls.Add(this.labelTime);
             this.groupBox3.Controls.Add(this.button21);
             this.groupBox3.Controls.Add(this.button20);
             this.groupBox3.Controls.Add(this.button19);
@@ -368,12 +382,34 @@
             this.groupBox3.Controls.Add(this.labelLevel);
             this.groupBox3.Controls.Add(this.labelOrens);
             this.groupBox3.Controls.Add(this.labelDefence);
-            this.groupBox3.Location = new System.Drawing.Point(5, 20);
+            this.groupBox3.Location = new System.Drawing.Point(5, 6);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(363, 216);
+            this.groupBox3.Size = new System.Drawing.Size(363, 244);
             this.groupBox3.TabIndex = 14;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Details";
+            // 
+            // labelDay
+            // 
+            this.labelDay.AutoSize = true;
+            this.labelDay.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.labelDay.ForeColor = System.Drawing.Color.Black;
+            this.labelDay.Location = new System.Drawing.Point(205, 213);
+            this.labelDay.Name = "labelDay";
+            this.labelDay.Size = new System.Drawing.Size(41, 20);
+            this.labelDay.TabIndex = 36;
+            this.labelDay.Text = "Day:";
+            // 
+            // labelTime
+            // 
+            this.labelTime.AutoSize = true;
+            this.labelTime.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.labelTime.ForeColor = System.Drawing.Color.Black;
+            this.labelTime.Location = new System.Drawing.Point(57, 213);
+            this.labelTime.Name = "labelTime";
+            this.labelTime.Size = new System.Drawing.Size(47, 20);
+            this.labelTime.TabIndex = 35;
+            this.labelTime.Text = "Time:";
             // 
             // button21
             // 
@@ -579,9 +615,9 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox4.Controls.Add(this.labelTitle);
             this.groupBox4.Controls.Add(this.pictureBox1);
-            this.groupBox4.Location = new System.Drawing.Point(374, 20);
+            this.groupBox4.Location = new System.Drawing.Point(374, 6);
             this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Size = new System.Drawing.Size(810, 654);
+            this.groupBox4.Size = new System.Drawing.Size(810, 668);
             this.groupBox4.TabIndex = 15;
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "Map";
@@ -615,8 +651,9 @@
             this.textBox2.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox2.BackColor = System.Drawing.SystemColors.ButtonHighlight;
-            this.textBox2.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.textBox2.BackColor = System.Drawing.SystemColors.ActiveCaptionText;
+            this.textBox2.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.textBox2.ForeColor = System.Drawing.SystemColors.Window;
             this.textBox2.Location = new System.Drawing.Point(5, 641);
             this.textBox2.Multiline = true;
             this.textBox2.Name = "textBox2";
@@ -625,26 +662,78 @@
             this.textBox2.Size = new System.Drawing.Size(1176, 145);
             this.textBox2.TabIndex = 17;
             // 
-            // textBox3
+            // tabControl1
             // 
-            this.textBox3.Location = new System.Drawing.Point(5, 2);
-            this.textBox3.Name = "textBox3";
-            this.textBox3.ReadOnly = true;
-            this.textBox3.Size = new System.Drawing.Size(1176, 20);
-            this.textBox3.TabIndex = 18;
-            this.textBox3.Text = "Current Qeust:";
+            this.tabControl1.Controls.Add(this.tabPage2);
+            this.tabControl1.Controls.Add(this.tabPage1);
+            this.tabControl1.Location = new System.Drawing.Point(5, 256);
+            this.tabControl1.Name = "tabControl1";
+            this.tabControl1.SelectedIndex = 0;
+            this.tabControl1.Size = new System.Drawing.Size(363, 379);
+            this.tabControl1.TabIndex = 18;
+            // 
+            // tabPage2
+            // 
+            this.tabPage2.Controls.Add(this.splitContainer1);
+            this.tabPage2.Location = new System.Drawing.Point(4, 22);
+            this.tabPage2.Name = "tabPage2";
+            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage2.Size = new System.Drawing.Size(355, 353);
+            this.tabPage2.TabIndex = 1;
+            this.tabPage2.Text = "Inventory && Equitpment";
+            this.tabPage2.UseVisualStyleBackColor = true;
+            // 
+            // tabPage1
+            // 
+            this.tabPage1.Controls.Add(this.groupBox5);
+            this.tabPage1.Location = new System.Drawing.Point(4, 22);
+            this.tabPage1.Name = "tabPage1";
+            this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage1.Size = new System.Drawing.Size(355, 353);
+            this.tabPage1.TabIndex = 2;
+            this.tabPage1.Text = "Quests";
+            this.tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // groupBox5
+            // 
+            this.groupBox5.Controls.Add(this.gridQuests);
+            this.groupBox5.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.groupBox5.Location = new System.Drawing.Point(3, 3);
+            this.groupBox5.Name = "groupBox5";
+            this.groupBox5.Size = new System.Drawing.Size(349, 347);
+            this.groupBox5.TabIndex = 0;
+            this.groupBox5.TabStop = false;
+            this.groupBox5.Text = "Active Quests";
+            // 
+            // gridQuests
+            // 
+            this.gridQuests.AllowUserToAddRows = false;
+            this.gridQuests.AllowUserToDeleteRows = false;
+            this.gridQuests.AllowUserToResizeRows = false;
+            this.gridQuests.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            this.gridQuests.BackgroundColor = System.Drawing.Color.White;
+            this.gridQuests.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.gridQuests.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.gridQuests.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.gridQuests.GridColor = System.Drawing.SystemColors.ButtonFace;
+            this.gridQuests.Location = new System.Drawing.Point(3, 16);
+            this.gridQuests.MultiSelect = false;
+            this.gridQuests.Name = "gridQuests";
+            this.gridQuests.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            this.gridQuests.Size = new System.Drawing.Size(343, 328);
+            this.gridQuests.TabIndex = 3;
+            this.gridQuests.CellMouseDoubleClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.gridQuests_CellMouseDoubleClick);
             // 
             // frmStats
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1186, 824);
-            this.Controls.Add(this.textBox3);
+            this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.textBox2);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.groupBox4);
             this.Controls.Add(this.groupBox3);
-            this.Controls.Add(this.splitContainer1);
             this.Name = "frmStats";
             this.ShowIcon = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
@@ -663,6 +752,11 @@
             this.groupBox3.ResumeLayout(false);
             this.groupBox3.PerformLayout();
             this.groupBox4.ResumeLayout(false);
+            this.tabControl1.ResumeLayout(false);
+            this.tabPage2.ResumeLayout(false);
+            this.tabPage1.ResumeLayout(false);
+            this.groupBox5.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.gridQuests)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -713,6 +807,12 @@
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.TextBox textBox2;
         private System.Windows.Forms.Label labelTitle;
-        private System.Windows.Forms.TextBox textBox3;
+        private System.Windows.Forms.TabControl tabControl1;
+        private System.Windows.Forms.TabPage tabPage2;
+        private System.Windows.Forms.TabPage tabPage1;
+        private System.Windows.Forms.GroupBox groupBox5;
+        private System.Windows.Forms.DataGridView gridQuests;
+        public System.Windows.Forms.Label labelTime;
+        public System.Windows.Forms.Label labelDay;
     }
 }

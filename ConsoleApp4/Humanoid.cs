@@ -25,9 +25,8 @@ namespace ConsoleApp4
         public int AvailablePowerPoints { get; set; } = 0;
         public Level CombatLevel { get; set; }
         public ToolItem Belt { get; set; }
-        public int Qeusts  { get; set; }
-
-
+        public List<Quest> ActivatedQuests = new List<Quest>();
+                
         public Level Smithing { get; set; } = new Level();
         public Level Barter { get; set; } = new Level();
 

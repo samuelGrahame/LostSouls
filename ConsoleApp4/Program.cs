@@ -29,7 +29,7 @@ namespace ConsoleApp4
                         
             ActiveWorld = new World();
 
-            var input = Question("Welcome to Lost Souls, Would you like to play a (new, load, editor) game?", "new", "load", "editor");
+            var input = Question("Welcome to Lost Lands, Would you like to play a (new, load, editor) game?", "new", "load", "editor");
 
             if (input == "load" && Database.LoadWorld(out ActiveWorld))
             {
@@ -57,10 +57,10 @@ namespace ConsoleApp4
 
                 newBorn.Race = (Race)randomizer.Next(3);
 
-                WriteLine($"The Doctor: Congratulations, Your wife has had a {newBorn.GetDescription()}!!");
+                WriteLine($"The Doctor: Congratulations, it is a {newBorn.GetDescription()}!!");
 
                 //newBorn.Gender = (gender = Question("The Doctor: Congratulations, Your wife has had a baby (girl, boy)?", "girl", "boy")).ToLower() == "boy" ? Gender.Male : Gender.Female;
-                newBorn.Name = Question($"Your Wife: What would you like to name our {newBorn.GetDescription()}?");
+                newBorn.Name = Question($"What would you like to name {newBorn.GetDescription()}?");
 
                 if(string.IsNullOrWhiteSpace(newBorn.Name))
                 {
@@ -99,119 +99,61 @@ namespace ConsoleApp4
                 WriteLine("You received 10 Power Points!!!!");
 
                 newBorn.AvailablePowerPoints += 10;
-                UpdateStats(newBorn);
-
-                //WriteLine("Your Dad approaches...");
-
-                //if (Question("Dad: Your Mum has been stabbed severly and died a little while ago.\r\n2 Weeks later...\r\n" +
-                //    "Are you going to place something important at her gravestone? (yes, no)", "yes", "no") == "yes")
-                //{
-                //    newBorn.Power.Defence += 1;
-                //    WriteLine("It's what she would've wanted.");                    
-                //}
-                //else
-                //{
-                //    newBorn.Power.Strength += 1;
-                //    WriteLine("I'm not going to place something to rot with her corpes!");
-                //}
-
+                
                 //UpdateStats(newBorn);
+             
+                //(Quest 1("Old Woman: I need some tree seeds?
 
-                //WriteLine("A Stranger approaches...");
-                //if (Question($"Stranger: {newBorn.Race:G} give me your all your valueables? (yes, no)", "yes", "no") == "yes")
-                //{
+                //    newBorn.Power.Defence += 1;
                 //    newBorn.Power.Inteligence += 1;
-                //    WriteLine("Here you go! Just don't kill me.");
-                //}
-                //else
-                //{
-                //    newBorn.Power.Defence += 1;
-                //    WriteLine("Not over my dead body!");
-                //}
-
-                //UpdateStats(newBorn);
-
-                //WriteLine("A Old Woman approaches...");
-
-                //if (Question("Old Woman: i have lost alot of money can you help find my money? (yes, no)", "yes", "no") == "yes")
-                //{
-                //    newBorn.Power.Inteligence += 1;
-                //    WriteLine("You've found it, Why thankyou.");
-                //}
-                //else                    
-                //{
                 //    newBorn.Power.Strength += 1;
-                //    WriteLine("Find it yourself");
-                //}
 
                 //UpdateStats(newBorn);
 
-                //WriteLine("Your Dad approaches...");
+                //(Quest 2("Old Woman: I'm hungary can you get me some fish?
 
-                //if (Question("Dad: Should I start finding another woman to be in our life? (yes, no)", "yes", "no") == "yes")
-                //{
                 //    newBorn.Power.Defence += 1;
-                //    WriteLine("I think it's for the best Dad.");
-                //}
-                //else
-                //{
-                //    newBorn.Power.Strength += 1;
-                //    WriteLine("Sorrow still feels my heart and i dont want us to move on.");
-                //}
-
-                //WriteLine("A Stranger approaches...");
-
-                //UpdateStats(newBorn);
-
-                //if (Question("Stranger:I will give you money if you steal a sword for me, will you do this for me? (yes, no)", "yes", "no") == "yes")
-                //{
                 //    newBorn.Power.Inteligence += 1;
-                //    WriteLine("It's your lucky day");
+                //    newBorn.Power.Strength += 1;
 
-                //    UpdateStats(newBorn);
-                //}
-                //else
-                //{
+                //UpdateStats(newBorn);
+               
+                //(Quest 3("Stranger:A bounty on RandomHumanoid, 
+
                 //    newBorn.Power.Defence += 1;
-                //    WriteLine("your a crimanal and you will rot in jail.");
+                //    newBorn.Power.Inteligence += 1;
+                //    newBorn.Power.Strength += 1;
 
                 //    UpdateStats(newBorn);
+                
+                //(Quest 4("Stranger:A bounty on RandomHumanoid, 
+                //
+                //    newBorn.Power.Defence += 1;
+                //    newBorn.Power.Inteligence += 1;
+                //    newBorn.Power.Strength += 1;
+                
+                //(Quest 5("Stranger:Steal someone's valueables?
 
-                //    WriteLine("A Old Woman approaches...");
-                //    if (Question("Old Woman: I'm sick can you get me a doctor? (yes, no)", "yes", "no") == "yes")
-                //    {
-                //        newBorn.Power.Inteligence += 1;
-                //        WriteLine("God bless you");
-                //    }
-                //    else
-                //    {
-                //        newBorn.Power.Strength += 1;
-                //        WriteLine("(Remain Silent....)");
-                //    }
-
-                //    UpdateStats(newBorn);
-
-                //    WriteLine("HELP! HELP! HELP!");
-                //    if (Question("Will you? (yes, no)", "yes", "no") == "yes")
-                //    {
-                //        newBorn.Power.Defence += 1;
-                //        WriteLine("My hero");
-                //    }                    
-                //    else
-                //    {
-                //        newBorn.Power.Strength += 1;
-                //        WriteLine("Well your the careless type, A dark heart");
-                //    }
+                //    newBorn.Power.Defence += 1;
+                //    newBorn.Power.Inteligence += 1;
+                //    newBorn.Power.Strength += 1;
 
                 //    UpdateStats(newBorn);
-                //}
+                
+                //(Quest 6("Builder: I Need some wood to build? 
+
+                //    newBorn.Power.Defence += 1;
+                //    newBorn.Power.Inteligence += 1;
+                //    newBorn.Power.Strength += 1;
+
+                //    UpdateStats(newBorn);
 
                 ActiveWorld.Play();                
             }            
         }
 
         private static bool _isReading;
-        
+
         static void ClearConsole()
         {
             var length = Console.CursorLeft;
@@ -228,11 +170,14 @@ namespace ConsoleApp4
 
         public static string ExternalResponce = "";
 
-        public static string ReadLineInternal ()
+        public static bool IsReading { get => _isReading; set => _isReading = value; }
+        public static bool IsReading1 { get => _isReading; set => _isReading = value; }
+
+        public static string ReadLineInternal()
         {
             ExternalResponce = "";
-            _isReading = true;
-            
+            IsReading = true;
+
             while (true)
             {
                 ConsoleKeyInfo cki;
@@ -265,7 +210,7 @@ namespace ConsoleApp4
                     var result = CurrentReadLine.ToString();
                     CurrentReadLine.Clear();
                     
-                    _isReading = false;
+                    IsReading = false;
                     return result;
                 }
                 else

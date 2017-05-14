@@ -115,8 +115,28 @@ namespace ConsoleApp4
                     {
                         rawMap.SetPixel(mapItem.X, mapItem.Y, Color.Black);
                     }else
-                    {
+                    {                        
                         var color = MapData.GetColor(mapItem);
+                        if(!ActiveWorld.IsDayTime())
+                        {
+                            if (MapData.IsGround(color))
+                            {
+                                color = Color.FromArgb(131, 24, 113);
+                            }
+                            else if(MapData.IsTree(color))
+                            {
+                                color = Color.FromArgb(90, 16, 78);
+                            }
+                            else if (MapData.IsWater(color))
+                            {
+                                color = Color.FromArgb(5, 32, 122);
+                            }
+                            else if (MapData.IsPath(color))
+                            {
+                                color = Color.FromArgb(59, 59, 59);
+                            }
+                        }                        
+
                         if (rawMap.GetPixel(mapItem.X, mapItem.Y) != color)
                         {
                             rawMap.SetPixel(mapItem.X, mapItem.Y, color);
@@ -153,6 +173,9 @@ namespace ConsoleApp4
                 this.labelName.Text = "Name: " + livingEntity.Name;
                 this.labelRace.Text = "Race: " + livingEntity.Race.ToString("G");
                 this.labelGender.Text = "Gender: " + livingEntity.Gender.ToString("G");
+                this.labelTime.Text = "Time: " + ActiveWorld.TimeInDay;
+                this.labelDay.Text = "Day: " + ActiveWorld.Day;
+
                 if (livingEntity.Orens == 1)
                 {
                     this.labelOrens.Text = "Oren: " + livingEntity.Orens;
@@ -219,6 +242,47 @@ namespace ConsoleApp4
 
                 HideAndReadOnlyDT(dataEquipt);
                 HideAndReadOnlyDT(dataInventory);
+
+                gridQuests.Columns.Clear();
+                gridQuests.DataSource = null;
+
+                DataTable dt3 = new DataTable();
+
+                dt3.Columns.Add("Description", typeof(string));
+                dt3.Columns.Add("Days Old", typeof(int));
+                dt3.Columns.Add("quest", typeof(Quest));
+
+                foreach (Quest quest in livingEntity.ActivatedQuests)
+                {
+                    DataRow dr = dt3.NewRow();
+
+                    switch (quest.Type)
+                    {
+                        case QuestType.GatherTrees:                            
+                        case QuestType.GatherFish:
+                            dr["Description"] = $"Gather {quest.QuantityTillFinished} {(quest.Type == QuestType.GatherTrees ? "wood" : "fish")}";
+                            break;
+                        case QuestType.GatherStrangers:
+                            dr["Description"] = $"Meet {quest.QuantityTillFinished} strangers and allow them to join your home town.";
+                            
+                            break;
+                        case QuestType.FightOrc:                            
+                        case QuestType.FightElfs:                            
+                        case QuestType.FightHumans:
+                            dr["Description"] = $"Defeat {quest.QuantityTillFinished} {((quest.Type == QuestType.FightOrc ? "orc" : quest.Type == QuestType.FightElfs ? "elf" : "human") + (quest.QuantityTillFinished > 1 ? "'s" : ""))} in battle.";
+                            break;                        
+                    }
+                    dr["quest"] = quest;
+                    
+                    dt3.Rows.Add(dr);
+
+                }
+
+                dt3.AcceptChanges();
+                
+                gridQuests.DataSource = dt3;
+
+                gridQuests.Columns["quest"].Visible = false;                
             }
         }
 
@@ -436,15 +500,25 @@ namespace ConsoleApp4
                             ActiveHuman.Hands = (WeaponItem)item;
                         }
                         else if (item is ToolItem)
-                        {
+                        {                            
                             if (ActiveHuman.Belt != null)
                             {
-                                ActiveHuman.Inventory.Items.Add(ActiveHuman.Belt);
-                                ActiveHuman.Belt = null;
+                                if (!(item is QuestItem))
+                                {
+                                    ActiveHuman.Inventory.Items.Add(ActiveHuman.Belt);
+                                    ActiveHuman.Belt = null;
+                                }                                
                             }
                             if (ActiveHuman.GetWearablePower().Inteligence >= ((ToolItem)item).Requirements)
                             {
-                                ActiveHuman.Belt = (ToolItem)item;
+                                if (!(item is QuestItem))
+                                {
+                                    ActiveHuman.Belt = (ToolItem)item;
+                                }
+                                else
+                                {
+                                    ActiveHuman.ActivatedQuests.Add(ActiveWorld.GetRandomQuestion());
+                                }                                                          
                             }
                             else
                             {
@@ -470,17 +544,24 @@ namespace ConsoleApp4
 
                             UpdateStats(ActiveHuman);
                         }
-                        else if (item is Fish)
+                        else if (ActiveHuman.Belt is QuestItem)
                         {
-                            if (ActiveHuman.Inventory.CanIUseResource(typeof(Qeusts), 1))
+                            // do we have tree seeds to complete quest
+                            if (ActiveHuman.Inventory.CanIUseResource(typeof(TreeSeeds), 25))
                             {
-                                ActiveHuman.Inventory.AddOrRemoveResourceItem(typeof(Qeusts), -1);
+                                ActiveHuman.Inventory.AddOrRemoveResourceItem(typeof(TreeSeeds), -25);
+
+                                ActiveHuman.Power.Defence += 1;
+                                ActiveHuman.Power.Inteligence += 1;
+                                ActiveHuman.Power.Strength += 1;
+
+                                Program.WriteLineColor("Congratulations you have completed this quest.", ConsoleColor.Green, ConsoleColor.Black);
 
                                 UpdateStats(ActiveHuman);
                             }
                         }
                     }
-                }
+                        }
                 
             }
             else
@@ -548,7 +629,14 @@ namespace ConsoleApp4
                             ActiveHuman.Belt = null;
                         }
                     }
-
+                    else if (item is QuestItem)
+                    {
+                        if (ActiveHuman.Belt == item)
+                        {
+                            ActiveHuman.Inventory.Items.Add(ActiveHuman.Belt);
+                            ActiveHuman.Belt = null;                        
+                        }
+                    }
                     UpdateStats(ActiveHuman);
                 }
                 else
@@ -653,6 +741,8 @@ namespace ConsoleApp4
             {
                 ActiveWorld.CurrentX = x;
                 ActiveWorld.CurrentY = y;
+
+                ActiveWorld.IncrementTime(1, false);
             }
             else
             {
@@ -688,8 +778,9 @@ namespace ConsoleApp4
 
                     ActiveWorld.Map[x, y] = mapItem;
 
-                    UpdateWorld(ActiveWorld);
+                    ActiveWorld.IncrementTime(1, false);
 
+                    UpdateWorld(ActiveWorld);
                     UpdateStats(ActiveHuman);
                 }
             }
@@ -702,6 +793,7 @@ namespace ConsoleApp4
                     {
                         ActiveHuman.Inventory.AddOrRemoveResourceItem(typeof(Fish), 1);
                     }
+                    ActiveWorld.IncrementTime(3, false);
 
                     UpdateStats(ActiveHuman);                    
                 }else if (ActiveHuman.Belt is Hammer)
@@ -714,16 +806,16 @@ namespace ConsoleApp4
                         ActiveHuman.Inventory.AddOrRemoveResourceItem(typeof(Wood), -10);
                         
                         ActiveWorld.Map[x, y] = mapItem;
-
+                        
+                        ActiveWorld.IncrementTime(10, false);
+                        
                         UpdateWorld(ActiveWorld);
                         UpdateStats(ActiveHuman);
-                    }
-                    
+                    }                    
                 }
             }
-
-        }
-
+                 
+        }       
         private void button9_Click(object sender, EventArgs e)
         {
             WriteLineProcess("Outside");
@@ -795,6 +887,96 @@ namespace ConsoleApp4
             {
                 WriteLineProcess(textBox1.Text);
                 textBox1.Text = "";
+            }
+        }
+
+        private void gridQuests_CellMouseDoubleClick(object sender, DataGridViewCellMouseEventArgs e)
+        {
+            if (gridQuests.SelectedRows.Count == 0)
+                return;
+
+            var item = (Quest)gridQuests.SelectedRows[0].Cells["quest"].Value;
+
+            if(ActiveHuman.ActivatedQuests.Contains(item))
+            {
+                bool AcceptPrice = false;
+                int orens = 0;
+                int strength = 0;
+                int intelligence = 0;
+                int defence = 0;
+                int attributes = 0;
+                
+                switch (item.Type)
+                {
+                    case QuestType.GatherTrees:
+                        if(ActiveHuman.Inventory.CanIUseResource(typeof(Wood), item.QuantityTillFinished))
+                        {
+                            orens = item.QuantityTillFinished * 50;
+                            ActiveHuman.Orens += orens;
+                            AcceptPrice = true;
+                        }
+                        
+                        break;
+                    case QuestType.GatherFish:
+                        if(ActiveHuman.Inventory.CanIUseResource(typeof(Fish), item.QuantityTillFinished))
+                        {
+                            orens = item.QuantityTillFinished * 23;
+                            ActiveHuman.Orens += orens;
+                            AcceptPrice = true;
+                        }
+                        
+                        break;
+                    case QuestType.GatherStrangers:
+                        if((ActiveWorld.TotalStrangersCollected - item.InternalReference) >= item.QuantityTillFinished)
+                        {
+                            attributes = (int)(item.QuantityTillFinished * 0.5);
+                            ActiveHuman.AvailablePowerPoints += attributes;
+                            AcceptPrice = true;
+                        }
+                       
+                        break;
+                    case QuestType.FightOrc:
+                        if((ActiveWorld.TotalOrcsDefeated - item.InternalReference) >= item.QuantityTillFinished)
+                        {
+                            strength = (int)(item.QuantityTillFinished * 0.5);
+                            ActiveHuman.Power.Strength += strength;
+                            AcceptPrice = true;
+                        }
+                        
+
+                        break;
+                    case QuestType.FightElfs:
+                        if((ActiveWorld.TotalElfsDefeated - item.InternalReference) >= item.QuantityTillFinished)
+                        {
+                            intelligence = (int)(item.QuantityTillFinished * 0.5);
+                            ActiveHuman.Power.Inteligence += intelligence;
+                            AcceptPrice = true;
+                        }
+                        
+                        break;
+                    case QuestType.FightHumans:
+                        if((ActiveWorld.TotalHumansDefeated - item.InternalReference) >= item.QuantityTillFinished)
+                        {
+                            defence = (int)(item.QuantityTillFinished * 0.5);
+                            ActiveHuman.Power.Defence += defence;
+                            AcceptPrice = true;
+                        }
+                        
+
+                        break;
+                    default:
+                        break;
+                }                
+
+                if(AcceptPrice == true)
+                {
+                    ActiveHuman.ActivatedQuests.Remove(item);
+                    UpdateStats(ActiveHuman);
+                }
+            }
+            else
+            {
+                UpdateStats(ActiveHuman);
             }
         }
     }

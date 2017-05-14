@@ -58,7 +58,8 @@
     <Compile Include="MapPictureBox.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Qeusts.cs" />
+    <Compile Include="Quest.cs" />
+    <Compile Include="QuestItem.cs" />
     <Compile Include="ResourceItem.cs" />
     <Compile Include="ToolItem.cs" />
     <Compile Include="TreeSeeds.cs" />

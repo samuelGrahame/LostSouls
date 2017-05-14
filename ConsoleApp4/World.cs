@@ -23,7 +23,38 @@ namespace ConsoleApp4
         public Buildings ActiveBuilding = null;
         public LocationSpot HomeTown = null;
         public List<LocationSpot> Locations = new List<LocationSpot>();
+        public int Day = 0;
+        public int DayLastSlept = 0;
+        public int TimeInDay = 7;
 
+        public bool IsDayTime()
+        {
+            return TimeInDay >= 7 && TimeInDay < 19;
+        }
+
+        public int TotalStrangersCollected = 0;
+        public int TotalElfsDefeated = 0;
+        public int TotalHumansDefeated = 0;
+        public int TotalOrcsDefeated = 0;
+
+        public void IncrementTime(int number, bool updateScreen = true)
+        {
+            if (number == 0)
+                return;
+
+            TimeInDay += number;
+            while(TimeInDay > 24)
+            {
+                TimeInDay -= 24;
+                Day += 1;
+            }
+            if(updateScreen)
+            {
+                UpdateStats(MainCharacter);
+                stats.UpdateWorld(this);
+            }            
+        }
+                
         [JsonIgnoreAttribute]
         public Bitmap MapRawData;
         public string MapRawDataString;
@@ -58,6 +89,31 @@ namespace ConsoleApp4
 		{
 			Humanoids.Remove(humanoid);
 		}
+
+        public Quest GetRandomQuestion()
+        {
+            var quest = new Quest() { QuantityTillFinished = random.Next(1, 100), Type = (QuestType)random.Next(6), StartDay = Day };
+
+            switch (quest.Type)
+            {             
+                case QuestType.GatherStrangers:
+                    quest.InternalReference = TotalStrangersCollected;
+                    break;
+                case QuestType.FightOrc:
+                    quest.InternalReference = TotalOrcsDefeated;
+                    break;
+                case QuestType.FightElfs:
+                    quest.InternalReference = TotalElfsDefeated;
+                    break;
+                case QuestType.FightHumans:
+                    quest.InternalReference = TotalHumansDefeated;
+                    break;
+                default:
+                    break;
+            }
+
+            return quest;
+        }
 
         public void ProcessBuyOrMakeItem(IList Items, string Caption)
         {
@@ -156,6 +212,8 @@ namespace ConsoleApp4
         public void Play()
         {
             var thr = new Thread(() => {
+                stats.ActiveWorld = this;
+                stats.ActiveHuman = MainCharacter;
                 stats.ShowDialog();
             });
             thr.SetApartmentState(ApartmentState.STA);
@@ -169,12 +227,11 @@ namespace ConsoleApp4
 
             while(running)
             {
-                Program.UpdateStats(MainCharacter);
                 MakeVisible();
+
+                Program.UpdateStats(MainCharacter);                
                 Program.stats.UpdateWorld(this);
-
                 
-
                 switch (CurrentLocation)
                 {
                     case Location.LocationSpot:
@@ -194,8 +251,16 @@ namespace ConsoleApp4
                         if (ActiveLocation == HomeTown)
                         {                            
                             Commands.Add(new Tuple<string, string, Action>($"{Commands.Count}: Enter your (home) and (sleep).", $"home,sleep,{Commands.Count}", ()=> {
-                                Save();
-                                WriteLineColor("You feel rested...", ConsoleColor.Green, ConsoleColor.Black);
+                                if(!IsDayTime())
+                                {
+                                    IncrementTime(12);
+                                    Save();
+                                    WriteLineColor("You feel rested...", ConsoleColor.Green, ConsoleColor.Black);
+                                }
+                                else
+                                {
+                                    WriteLineColor("You don't feel tired it is only " + TimeInDay + ":00. (24 hr time)", ConsoleColor.Red, ConsoleColor.Black);
+                                }                    
                             }));
                         }
 
@@ -260,6 +325,9 @@ namespace ConsoleApp4
                         {
                             Commands4.Add("7,tool");
                         }
+                        {
+                            Commands4.Add("8,Quests");
+                        }
                         input = Question(string.Format(
 ActiveBuilding.Owner.Name + @": Welcome to my {1:G}, Can I help you with something?
 0: {0}weapon's.
@@ -307,12 +375,8 @@ ActiveBuilding.Owner.Name + @": Welcome to my {1:G}, Can I help you with somethi
                                 break;
                             case "7,tool":
                                 ProcessBuyOrMakeItem(Database.Tools, "Tools");
-
+                      
                                 break;
-                            case "8,Qeust":
-                                //ProcessBuyOrMakeItem(Database.Qeust, "Qeust");// ghehe
-                                break;
-
                         }
                         
                         break;
@@ -491,6 +555,8 @@ ActiveBuilding.Owner.Name + @": Welcome to my {1:G}, Can I help you with somethi
                     string input = Question("Do you want to help this stranger?", "no","yes");
                     if (input == "yes")
                     {
+                        TotalStrangersCollected += 1;
+
                         WriteLine($"Sure you can come to my town {HomeTown.Name}.");
                         WriteLine($"The Coordinates are {HomeTown.X}, {HomeTown.Y}.");
                         int xp = 100;
@@ -689,14 +755,32 @@ Try to Flee.",
                 CurrentX = HomeTown.X;
                 CurrentY = HomeTown.Y;
                 ActiveLocation = HomeTown;
+
+                ActiveWorld.IncrementTime(12, false);
             }
             else
             {
+                WriteLineColor($"You have defeated your enemy in battle!", ConsoleColor.DarkMagenta, ConsoleColor.Black);
+
+                switch (Enemy.Race)
+                {
+                    case Race.Orc:
+                        TotalOrcsDefeated += 1;
+                        break;
+                    case Race.Human:
+                        TotalHumansDefeated += 1;
+                        break;
+                    case Race.Elf:
+                        TotalElfsDefeated += 1;
+                        break;
+                    default:
+                        break;
+                }
+
                 if (Income > 0)
                 {
                     MainCharacter.Orens += Income;
-
-                    WriteLineColor($"You have defeated your enemy in battle!", ConsoleColor.DarkMagenta, ConsoleColor.Black);
+                    
                     WriteLineColor($"You found {GetOrenLabel(Income)} while searching the enemies body!!!", ConsoleColor.Yellow, ConsoleColor.Black);
                     
                     if (Enemy.Hands != null &&  Percent(50))
@@ -707,10 +791,11 @@ Try to Flee.",
                     
                     WriteLineColor($"You now have {GetOrenLabel(MainCharacter.Orens)}", ConsoleColor.Yellow, ConsoleColor.Black);                    
                 }
+
+                ActiveWorld.IncrementTime(1, false);
             }
         }
-	}
-
+	}   
     public enum ForestEvent
     {
         None,
